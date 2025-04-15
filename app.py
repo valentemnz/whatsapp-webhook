@@ -1,15 +1,15 @@
 from flask import Flask, request
-import requests
-import openai
 import os
+import requests
+from openai import OpenAI
 
 app = Flask(__name__)
 
-# Configura tu clave de OpenAI aquí
-openai.api_key = os.environ.get("OPENAI_API_KEY")
+# Cliente de OpenAI con clave desde variable de entorno
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-# Token y número configurado en tu app de Meta
-WHATSAPP_TOKEN = "EAAU4xPS3ZCx8BO56nb1HRQdMljcA9OtxLekUxIXMwb0ZAynKkJB6PbBBTiyS2j6kXsoJjoob7b1X9sOtcpT5rxAReZAbduA2RRK83L4sgZCVyRb2LyZBk0vW6XOpZCSZBM1OAG98C83e5dEU9YRPCGCC3yuhK3ZC3QR7cvQ8erZCkS9WrmGKl4NmlPRqsdBZCFl6ZBRTkz3ldbK2ZC5lQAJCaYU0A4Ul6cAZD"
+# Token y número de WhatsApp configurado en Meta
+WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN")  # también puedes hardcodearlo
 PHONE_NUMBER_ID = "599820413221132"
 
 @app.route("/webhook", methods=["GET", "POST"])
@@ -32,14 +32,18 @@ def webhook():
             text = message["text"]["body"]
             from_number = message["from"]
 
-            # Consulta a ChatGPT
-            response = openai.ChatCompletion.create(
+            print("✅ Mensaje recibido:", text)
+
+            # Petición a ChatGPT (GPT-4)
+            response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": text}]
             )
-            reply = response.choices[0].message["content"]
+            reply = response.choices[0].message.content.strip()
 
-            # Enviar respuesta a WhatsApp
+            print("🧠 Respuesta GPT:", reply)
+
+            # Enviar la respuesta por WhatsApp
             url = f"https://graph.facebook.com/v18.0/{PHONE_NUMBER_ID}/messages"
             headers = {
                 "Authorization": f"Bearer {WHATSAPP_TOKEN}",
