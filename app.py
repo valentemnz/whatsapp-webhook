@@ -5,11 +5,11 @@ from openai import OpenAI
 
 app = Flask(__name__)
 
-# Cliente de OpenAI con clave desde variable de entorno
+# Cliente OpenAI con variable de entorno
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-# Token y número de WhatsApp configurado en Meta
-WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN")  # también puedes hardcodearlo
+# Configuración de WhatsApp
+WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN")
 PHONE_NUMBER_ID = "599820413221132"
 
 @app.route("/webhook", methods=["GET", "POST"])
@@ -34,16 +34,16 @@ def webhook():
 
             print("✅ Mensaje recibido:", text)
 
-            # Petición a ChatGPT (GPT-4)
+            # GPT-3.5-turbo (disponible para todos con API Key)
             response = client.chat.completions.create(
-                model="gpt-4",
+                model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": text}]
             )
             reply = response.choices[0].message.content.strip()
 
             print("🧠 Respuesta GPT:", reply)
 
-            # Enviar la respuesta por WhatsApp
+            # Enviar respuesta a WhatsApp
             url = f"https://graph.facebook.com/v18.0/{PHONE_NUMBER_ID}/messages"
             headers = {
                 "Authorization": f"Bearer {WHATSAPP_TOKEN}",
