@@ -55,7 +55,9 @@ def webhook():
                 "type": "text",
                 "text": {"body": reply}
             }
-            requests.post(url, headers=headers, json=payload)
+
+            response_whatsapp = requests.post(url, headers=headers, json=payload)
+            print("📤 Respuesta de WhatsApp:", response_whatsapp.status_code, response_whatsapp.text)
 
         except Exception as e:
             print("❌ ERROR en webhook:", e)
